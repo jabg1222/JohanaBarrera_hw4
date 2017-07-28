@@ -22,9 +22,11 @@ int index_j(int j);
 
 float radio_max(int x, int y, int **matriz);
 
+void imprimir_datos(int **matriz);
+
 void Libera(int **matrix);
 
-//void Calculo_radio(int pt_alea );
+
 
 
 int main()
@@ -34,97 +36,88 @@ int main()
 	col=744;
 	int **matriz=Matriz();
 	int *Num_alea=malloc(2*sizeof(int));
-	int i;
-	int j;
-
-
-
-	//printf("%f\n", radio_max(700,800, matriz) );
-	//printf("%d\n", index_j(-1));
-	//printf("%d\n", index_i(-1));
-
-	int alea1=Num_alea[0];
-	int alea2=Num_alea[1];
-	N_alea(Num_alea, matriz);
-	//printf("%d , %d\n", alea1,alea2 );
-
-int N=3720; //500*744 tam de la matriz
-    int n;
-  
-    srand48(time(NULL));
-    
-    int maxmimox;
-    int maxmimoy;
-    int maxmimor;
-   
-    //printf("%f\n", beta);
-   
-   
-
-    double x_new,y_new,r_new;
-
-    
-
-    double alpha;
+	int iter=100; // Numero de iteraciones, es decir que va evaluar el radio en diferentes 1000 numeros aleatorios.
+	double x_nuevo,y_nuevo,r_nuevo, r_viejo;
+	int i, j, p; // contadores.
+	// Variables en donde voy a guardar las coordenadas del punto Nemo.
+    	int cord_x; 
+    	int cord_y;
+    	int max_r; //Radio maximo
+	double alfa;
 	double beta;
-
-    float r_old=radio_max(Num_alea[0], Num_alea[1], matriz);
-    maxmimor=r_old;
-    //printf("%f\n", r_old);
-
-
-for(n=0;n<N;n++)
-    {
-        x_new = Num_alea[0] + (-25) + rand() % (26 - 25);
-        y_new = Num_alea[1] + (-25) + rand() % (26 - 25);
-
+	
 	
 
+	imprimir_datos(matriz); // Guarda los datos originales en el archivo mapa.csv
 
-        r_new = radio_max(x_new, y_new, matriz);
+	N_alea(Num_alea, matriz); // Genera numeros aleatorios dentro del tamaño de la matriz.
 
-        if(r_new>maxmimor)
+
+    	srand48(time(NULL)); // Semilla para generar los numeros aleatorios en beta.
+    
+	r_viejo=radio_max(Num_alea[0], Num_alea[1], matriz); // Radio generado en el punto aleatorio.
+
+    	max_r=r_viejo;
+  
+
+
+for( p=0; p<iter; p++)
+{
+	// Variables que guardan un punto aleatorio nuevo.
+        x_nuevo = Num_alea[0] + (-25) + rand() % (26 - 25);
+        y_nuevo = Num_alea[1] + (-25) + rand() % (26 - 25);
+
+	// Si la posicion en la matriz es igual a 1, debe generar un nuevo punto aleatorio hasta que de un cero.
+        while(matriz[index_i(x_nuevo)][index_j(y_nuevo)]==1)
+    	{
+        	x_nuevo = Num_alea[0] + (-25) + rand() % (26 - 25);
+        	y_nuevo = Num_alea[1] + (-25) + rand() % (26 - 25);
+	}
+
+        r_nuevo = radio_max(x_nuevo, y_nuevo, matriz);
+
+	// Se hace lo siguiente para que quede guardado siempre el mayor radio posible.
+        if(r_nuevo > max_r)
         {
-            maxmimox=x_new;
-            maxmimoy=y_new;
-            maxmimor=r_new;
+            cord_x=x_nuevo;
+            cord_y=y_nuevo;
+            max_r=r_nuevo;
         }
 
-        else{
-        alpha=(float)r_new/(float)r_old;
+
+        alfa=(float)r_nuevo/(float)r_viejo;
         
-        if (alpha>=1)
+        if (alfa>=1)
         {
-            Num_alea[0]= x_new;
-            Num_alea[1]= y_new;
-            r_old= r_new;
+            Num_alea[0]= x_nuevo;
+            Num_alea[1]= y_nuevo;
+            r_viejo= r_nuevo;
         }
 
-        else{
-            beta=drand48();
-            if(alpha<=beta){
-                continue;
-            }
+        else 
+	{
+            beta=drand48(); // Genera num aleatorios entre 0 y 1.
+
+            if(alfa<=beta)// Si es mayor a alfa siga generando un nuevo num aleatorio.
+		{ 
+                	continue;
+        	}
             
-            else{
-                Num_alea[0]= x_new;
-                Num_alea[1]= y_new;
-                r_old= r_new;
-                }    
-            }
-       
+       	    else
+		{
+             		Num_alea[0]= x_nuevo;
+             		Num_alea[1]= y_nuevo;
+             		r_viejo= r_nuevo;
+         	}          
 
-        
-        //printf("%f\n", x_new);
-        //printf("%f\n", y_new);
-        //printf("%d\n", indice1);
-        //printf("%f\n", indice2);
-    }
+    	}
 
  }
 
 
 
+	
+	printf("%d, %d, %f\n", cord_x, cord_y, max_r);
 
 
 	Libera(matriz);
@@ -134,7 +127,7 @@ for(n=0;n<N;n++)
 // La siguiente funcion retorna los datos map_data.txt guardados en una matriz.
 int **Matriz(void)
 {
-	FILE *file;
+    FILE *file;
     file=fopen("map_data.txt", "r");
     int len=200000;
     char lineas[len];
@@ -161,7 +154,7 @@ int **Matriz(void)
 // LEE EL ARCHIVO Y LO GUARDA EN LA MATRIZ
   while(fgets(lineas,len,file) )
 {
-  //printf("%s\n",lineas );
+
 	
   j=0;
   separar=strtok(lineas,delim);
@@ -180,7 +173,6 @@ int **Matriz(void)
     j=j+1;
       
     }
-    //printf("\n");
    	
 	i=i+1;
     
@@ -189,13 +181,6 @@ int **Matriz(void)
 return matriz;
 }
 
-double Calculo_radio(int x0, int x, int y0, int y)
-{
-	double r;
-	r=pow((x0-x),2.0)+pow((y0-y),2.0);
-
-	return pow(r,(1.0/2.0));
-}
 
 void N_alea(int *ind, int **matriz)
 {
@@ -283,9 +268,7 @@ int index_j(int j)
 }
 
 
-
-
-
+// Calcula el radio maximo.
 float radio_max(int x, int y, int **matriz)
 {
 int r_max;
@@ -346,7 +329,31 @@ for ( r = 1; r < fil; ++r)
 return r_max;
 }
 
+// Imprime los datos.
+void imprimir_datos(int **matriz)
+{
+	int i, j;
+	FILE*out;
+	out=fopen("mapa.csv", "w+");
 
+
+ for ( i = 0; i < fil; ++i)
+ {
+ 	for (j = 0; j <col ; ++j)
+ 	{
+ 		
+			
+			fprintf(out,"%d\t", matriz[i][j]);
+ 		
+ 		
+ 	}
+ 	fprintf(out,"\n");
+ }
+
+fclose(out);
+
+}
+// Libera memoria.
 
 void Libera(int **matrix)
 {
