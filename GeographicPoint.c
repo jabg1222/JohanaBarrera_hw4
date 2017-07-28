@@ -12,11 +12,15 @@ int col;
 
 int **Matriz(void);
 
-void rand(int *ind);
-
-int index_periodic(int i, int j, int count);
-
 double Calculo_radio(int x0, int x, int y0, int y);
+
+void N_alea(int *ind, int **matriz);
+
+int index_i(int i);
+
+int index_j(int j);
+
+float radio_max(int x, int y, int **matriz);
 
 void Libera(int **matrix);
 
@@ -29,38 +33,99 @@ int main()
 	fil=500;
 	col=744;
 	int **matriz=Matriz();
+	int *Num_alea=malloc(2*sizeof(int));
 	int i;
 	int j;
-/*
-for ( i = 0; i < fil; ++i)
-{
-	for (j = 0; j <col ; ++j)
-	{
-		
-			printf("%d\t", matriz[i][j]);
-		
-		
-	}
-	printf("\n");
-}
-*/
-	/*
-	int a=0;
-	for ( i = 0; i < fil; ++i)
-	{
-		for (int j = 0; j < col; ++j)
-		{
-			while(matriz[i][j+a]==0 && matriz[i][j-a]==0 && matriz[i+a][j]==0 && matriz[i-a][j]==0)
-			{
-				
-					a=a+1;
 
-			}
-		}
-	}
-	//printf("%e\n", Calculo_radio(1, 2, 1, 2) );
-*/
-	printf("%d", index_periodic( 499, 300, 1));
+
+
+	//printf("%f\n", radio_max(700,800, matriz) );
+	//printf("%d\n", index_j(-1));
+	//printf("%d\n", index_i(-1));
+
+	int alea1=Num_alea[0];
+	int alea2=Num_alea[1];
+	N_alea(Num_alea, matriz);
+	//printf("%d , %d\n", alea1,alea2 );
+
+int N=3720; //500*744 tam de la matriz
+    int n;
+  
+    srand48(time(NULL));
+    
+    int maxmimox;
+    int maxmimoy;
+    int maxmimor;
+   
+    //printf("%f\n", beta);
+   
+   
+
+    double x_new,y_new,r_new;
+
+    
+
+    double alpha;
+	double beta;
+
+    float r_old=radio_max(Num_alea[0], Num_alea[1], matriz);
+    maxmimor=r_old;
+    //printf("%f\n", r_old);
+
+
+for(n=0;n<N;n++)
+    {
+        x_new = Num_alea[0] + (-25) + rand() % (26 - 25);
+        y_new = Num_alea[1] + (-25) + rand() % (26 - 25);
+
+	
+
+
+        r_new = radio_max(x_new, y_new, matriz);
+
+        if(r_new>maxmimor)
+        {
+            maxmimox=x_new;
+            maxmimoy=y_new;
+            maxmimor=r_new;
+        }
+
+        else{
+        alpha=(float)r_new/(float)r_old;
+        
+        if (alpha>=1)
+        {
+            Num_alea[0]= x_new;
+            Num_alea[1]= y_new;
+            r_old= r_new;
+        }
+
+        else{
+            beta=drand48();
+            if(alpha<=beta){
+                continue;
+            }
+            
+            else{
+                Num_alea[0]= x_new;
+                Num_alea[1]= y_new;
+                r_old= r_new;
+                }    
+            }
+       
+
+        
+        //printf("%f\n", x_new);
+        //printf("%f\n", y_new);
+        //printf("%d\n", indice1);
+        //printf("%f\n", indice2);
+    }
+
+ }
+
+
+
+
 
 	Libera(matriz);
 	return 0;
@@ -124,9 +189,15 @@ int **Matriz(void)
 return matriz;
 }
 
+double Calculo_radio(int x0, int x, int y0, int y)
+{
+	double r;
+	r=pow((x0-x),2.0)+pow((y0-y),2.0);
 
+	return pow(r,(1.0/2.0));
+}
 
-void rand(int *ind)
+void N_alea(int *ind, int **matriz)
 {
 	int  a, b ;
 	srand(time(NULL));
@@ -137,46 +208,145 @@ void rand(int *ind)
 		a=rand()%(500);
 		b=rand()%(744);
 	}
-	//printf("%d , %d\n", i,j);
-	index[0]=a;
-	index[1]=b;
+	//printf("%d , %d\n", a,b);
+	ind[0]=a;
+	ind[1]=b;
 }
 
-double Calculo_radio(int x0, int x, int y0, int y)
-{
-	int r;
-	r=pow((x0-x),2.0)+pow((y0-y),2.0);
 
-	return pow(r,(1.0/2.0));
-}
 
-int index_periodic(int i, int j, int count)
+int index_i(int i)
 {
-	if ( (i+count)>(fil-count) )
+	int ind=i;
+	if ( (ind)>=fil )
 	{
-		int a= (i+count)%500;
+		 ind= (i)%500;
 	
-		return a;
+		
 	}
-	if ( (j+count)>(col-count) )
+
+	if ((ind)<0 )
 	{
-		int b= (j+count)%744;
+		ind=(i)+fil;
+		
+	
+	}
+	
+	return ind;
+	
+
+
+}
+/*
+int index_j(int j)
+{
+
+	if ( (j)>(col-1) )
+	{
+		int b= (j)%744;
 
 		return b;
 	}
-	if ((i-count)<0 )
+
+
+	if ((j)<0)
 	{
-		int c=(i-count)+fil;
-		
-		return c;
-	}
-	if ((j-count)<0)
-	{
-		int d=(j-count)+col;
+		int d=(j)+col;
 
 		return d;
 	}
+	else{
+	return j;
+	}
 }
+*/
+int index_j(int j)
+{
+	int ind;
+	if ( (ind)>=col )
+	{
+		ind= (j)%744;
+
+		
+	}
+
+
+	if ((ind)<0)
+	{
+		ind=(j)+col;
+
+		
+	}
+	
+	return ind;
+	
+}
+
+
+
+
+
+float radio_max(int x, int y, int **matriz)
+{
+int r_max;
+int r;
+int i;
+int j;
+
+int pare=0;
+for ( r = 1; r < fil; ++r)
+{
+
+
+	for ( i = x-r; i < x+r ; ++i)
+	{
+
+		for (j = y-r; j < y+r ; ++j)
+		{
+		
+			if( (pow((pow((x-i),2.0)+pow((y-j),2.0)),0.5) <= r) )
+		
+			{
+			
+			
+				if(matriz[index_i(i)][index_j(j)]==1 )
+				{
+
+				r_max=r;
+				pare=1;
+				}
+
+			
+			}
+
+		if(pare!=0)
+		{
+		break;
+		}
+
+
+		}
+
+	if(pare!=0)
+	{
+	break;
+	}
+
+
+	}
+
+	if(pare!=0)
+		{
+		break;
+		}
+
+
+}
+
+return r_max;
+}
+
+
 
 void Libera(int **matrix)
 {
