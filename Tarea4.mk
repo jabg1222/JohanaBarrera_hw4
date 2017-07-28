@@ -1,16 +1,16 @@
 # Tarea4.mk
 
 
-all: mapa.png
+all:PuntoNemo.pdf
 
-mapa.png: Plots.py
+PuntoNemo.pdf: Plots.py
 	python $<
 
-Plots.py: mapa.csv
+Plots.py: mapa.csv 
 	python $@
 
 mapa.csv: GeographicPoint.x
-	./$< >> $@
+	./$< >> respuesta.csv
 
 GeographicPoint.x: GeographicPoint.c
 	cc $< -lm -o $@
